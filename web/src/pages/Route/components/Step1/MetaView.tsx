@@ -14,7 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { AutoComplete, Button, Col, Input, notification, Row, Select, Switch, Tag } from 'antd';
+import {
+  AutoComplete,
+  Button,
+  Col,
+  Input,
+  notification,
+  Radio,
+  Row,
+  Select,
+  Switch,
+  Tag,
+} from 'antd';
 import Form from 'antd/es/form';
 import type { FC } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -22,7 +33,7 @@ import { useIntl } from 'umi';
 
 import LabelsDrawer from '@/components/LabelsfDrawer';
 import PanelSection from '@/components/PanelSection';
-import { FORM_ITEM_WITHOUT_LABEL } from '@/pages/Route/constants';
+import { CUSTOM_REDIRECT_TYPE, FORM_ITEM_WITHOUT_LABEL } from '@/pages/Route/constants';
 
 import { fetchLabelList, fetchServiceList } from '../../service';
 
@@ -281,20 +292,12 @@ const Redirect: FC = () => {
   );
 };
 
-const CustomRedirect: FC = () => {
+const CustomRedirectType = () => {
+  const { disabled, form } = useContext(MetaViewContext);
   const { formatMessage } = useIntl();
-  const { disabled, onChange = () => {}, form } = useContext(MetaViewContext);
-  return (
-    <Form.Item
-      noStyle
-      shouldUpdate={(prev, next) => {
-        if (prev.redirectOption !== next.redirectOption) {
-          onChange({ action: 'redirectOptionChange', data: next.redirectOption });
-        }
-        return prev.redirectOption !== next.redirectOption;
-      }}
-    >
-      {form?.getFieldValue('redirectOption') === 'customRedirect' && (
+  switch (form.getFieldValue('customRedirectType')) {
+    case CUSTOM_REDIRECT_TYPE.STATIC:
+      return (
         <Form.Item
           label={formatMessage({ id: 'page.route.form.itemLabel.redirectCustom' })}
           required
@@ -337,7 +340,144 @@ const CustomRedirect: FC = () => {
             </Col>
           </Row>
         </Form.Item>
-      )}
+      );
+    case CUSTOM_REDIRECT_TYPE.REGEXP:
+      return (
+        <React.Fragment>
+          <Form.List name="regex_uri" initialValue={['', '']}>
+            {(regex_uris) =>
+              regex_uris.map((regex_uri, index) => {
+                switch (index) {
+                  case 0:
+                    return (
+                      <Form.Item
+                        label={formatMessage({ id: 'page.route.form.itemLabel.regex' })}
+                        name={regex_uri.name}
+                        key={regex_uri.name}
+                        rules={[
+                          {
+                            required: true,
+                            message: `${formatMessage({
+                              id: 'component.global.pleaseEnter',
+                            })} ${formatMessage({ id: 'page.route.form.itemLabel.regex' })}`,
+                          },
+                        ]}
+                      >
+                        <Input
+                          placeholder={`${formatMessage({
+                            id: 'component.global.pleaseEnter',
+                          })} ${formatMessage({ id: 'page.route.form.itemLabel.regex' })}`}
+                          disabled={disabled}
+                        />
+                      </Form.Item>
+                    );
+                  case 1:
+                    return (
+                      <Form.Item
+                        label={formatMessage({ id: 'page.route.form.itemLabel.template' })}
+                        name={regex_uri.name}
+                        key={regex_uri.name}
+                        rules={[
+                          {
+                            required: true,
+                            message: `${formatMessage({
+                              id: 'component.global.pleaseEnter',
+                            })} ${formatMessage({ id: 'page.route.form.itemLabel.template' })}`,
+                          },
+                        ]}
+                      >
+                        <Input
+                          placeholder={`${formatMessage({
+                            id: 'component.global.pleaseEnter',
+                          })} ${formatMessage({ id: 'page.route.form.itemLabel.template' })}`}
+                          disabled={disabled}
+                        />
+                      </Form.Item>
+                    );
+                  default:
+                    return null;
+                }
+              })
+            }
+          </Form.List>
+          <Form.Item
+            label={formatMessage({ id: 'page.route.form.itemLabel.redirectCode' })}
+            required
+            style={{ marginBottom: 0 }}
+          >
+            <Form.Item name="ret_code" rules={[{ required: true }]}>
+              <Select disabled={disabled} data-cy="redirect_code">
+                <Select.Option value={301}>
+                  {formatMessage({ id: 'page.route.select.option.redirect301' })}
+                </Select.Option>
+                <Select.Option value={302}>
+                  {formatMessage({ id: 'page.route.select.option.redirect302' })}
+                </Select.Option>
+              </Select>
+            </Form.Item>
+          </Form.Item>
+        </React.Fragment>
+      );
+    default:
+      return null;
+  }
+};
+
+const CustomRedirect: React.FC = () => {
+  const { formatMessage } = useIntl();
+  const { disabled, onChange = () => {}, form } = useContext(MetaViewContext);
+  const options = [
+    {
+      value: CUSTOM_REDIRECT_TYPE.STATIC,
+      label: formatMessage({ id: 'page.route.radio.static' }),
+    },
+    {
+      value: CUSTOM_REDIRECT_TYPE.REGEXP,
+      label: formatMessage({ id: 'page.route.radio.regex' }),
+    },
+  ];
+
+  return (
+    <Form.Item
+      noStyle
+      shouldUpdate={(prev, next) => {
+        if (prev.redirectOption !== next.redirectOption) {
+          onChange({ action: 'redirectOptionChange', data: next.redirectOption });
+        }
+        return prev.redirectOption !== next.redirectOption;
+      }}
+    >
+      {() => {
+        if (form.getFieldValue('redirectOption') === 'customRedirect') {
+          return (
+            <React.Fragment>
+              <Form.Item
+                label={formatMessage({ id: 'page.route.form.itemLabel.URIRewriteType' })}
+                name="customRedirectType"
+              >
+                <Radio.Group disabled={disabled}>
+                  {options.map((item) => (
+                    <Radio value={item.value} key={item.value} id={item.value ? 'regex' : 'static'}>
+                      {item.label}
+                    </Radio>
+                  ))}
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item
+                shouldUpdate={(prevValues, curValues) =>
+                  prevValues.customRedirectType !== curValues.customRedirectType
+                }
+                noStyle
+              >
+                {() => {
+                  return CustomRedirectType();
+                }}
+              </Form.Item>
+            </React.Fragment>
+          );
+        }
+        return null;
+      }}
     </Form.Item>
   );
 };
