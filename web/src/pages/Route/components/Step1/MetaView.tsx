@@ -14,25 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import {
+  AutoComplete,
+  Button,
+  Col,
+  Input,
+  notification,
+  Radio,
+  Row,
+  Select,
+  Switch,
+  Tag,
+} from 'antd';
 import Form from 'antd/es/form';
 import type { FC } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import {
-  Input,
-  Switch,
-  Select,
-  Button,
-  Tag,
-  AutoComplete,
-  Row,
-  Col,
-  notification,
-  Radio,
-} from 'antd';
 import { useIntl } from 'umi';
+
 import LabelsDrawer from '@/components/LabelsfDrawer';
 import PanelSection from '@/components/PanelSection';
 import { CUSTOM_REDIRECT_TYPE, FORM_ITEM_WITHOUT_LABEL } from '@/pages/Route/constants';
+
 import { fetchLabelList, fetchServiceList } from '../../service';
 
 const field = 'custom_normal_labels';
@@ -293,116 +295,38 @@ const Redirect: FC = () => {
 const CustomRedirectType = () => {
   const { disabled, form } = useContext(MetaViewContext);
   const { formatMessage } = useIntl();
-    switch (form.getFieldValue('customRedirectType')) {
-      case CUSTOM_REDIRECT_TYPE.STATIC:
-        return (
-          <Form.Item
-            label={formatMessage({ id: 'page.route.form.itemLabel.redirectCustom' })}
-            required
-            style={{ marginBottom: 0 }}
-          >
-            <Row gutter={10}>
-              <Col span={5}>
-                <Form.Item
-                  name="redirectURI"
-                  rules={[
-                    {
-                      required: true,
-                      message: `${formatMessage({
-                        id: 'component.global.pleaseEnter',
-                      })}${formatMessage({
-                        id: 'page.route.form.itemLabel.redirectURI',
-                      })}`,
-                    },
-                  ]}
-                >
-                  <Input
-                    placeholder={formatMessage({
-                      id: 'page.route.input.placeholder.redirectCustom',
-                    })}
-                    disabled={disabled}
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={5}>
-                <Form.Item name="ret_code" rules={[{ required: true }]}>
-                  <Select disabled={disabled} data-cy="redirect_code">
-                    <Select.Option value={301}>
-                      {formatMessage({ id: 'page.route.select.option.redirect301' })}
-                    </Select.Option>
-                    <Select.Option value={302}>
-                      {formatMessage({ id: 'page.route.select.option.redirect302' })}
-                    </Select.Option>
-                  </Select>
-                </Form.Item>
-              </Col>
-            </Row>
-          </Form.Item>
-        );
-      case CUSTOM_REDIRECT_TYPE.REGEXP:
-        return (
-          <React.Fragment>
-            <Form.List name="regex_uri" initialValue={['', '']}>
-              {(fields) =>
-                fields.map((field, index) => {
-                  switch (index) {
-                    case 0:
-                      return (
-                        <Form.Item
-                          label={formatMessage({ id: 'page.route.form.itemLabel.regex' })}
-                          name={field.name}
-                          key={field.name}
-                          rules={[
-                            {
-                              required: true,
-                              message: `${formatMessage({
-                                id: 'component.global.pleaseEnter',
-                              })} ${formatMessage({ id: 'page.route.form.itemLabel.regex' })}`,
-                            },
-                          ]}
-                        >
-                          <Input
-                            placeholder={`${formatMessage({
-                              id: 'component.global.pleaseEnter',
-                            })} ${formatMessage({ id: 'page.route.form.itemLabel.regex' })}`}
-                            disabled={disabled}
-                          />
-                        </Form.Item>
-                      );
-                    case 1:
-                      return (
-                        <Form.Item
-                          label={formatMessage({ id: 'page.route.form.itemLabel.template' })}
-                          name={field.name}
-                          key={field.name}
-                          rules={[
-                            {
-                              required: true,
-                              message: `${formatMessage({
-                                id: 'component.global.pleaseEnter',
-                              })} ${formatMessage({ id: 'page.route.form.itemLabel.template' })}`,
-                            },
-                          ]}
-                        >
-                          <Input
-                            placeholder={`${formatMessage({
-                              id: 'component.global.pleaseEnter',
-                            })} ${formatMessage({ id: 'page.route.form.itemLabel.template' })}`}
-                            disabled={disabled}
-                          />
-                        </Form.Item>
-                      );
-                    default:
-                      return null;
-                  }
-                })
-              }
-            </Form.List>
-            <Form.Item
-              label={formatMessage({ id: 'page.route.form.itemLabel.redirectCode' })}
-              required
-              style={{ marginBottom: 0 }}
-            >
+  switch (form.getFieldValue('customRedirectType')) {
+    case CUSTOM_REDIRECT_TYPE.STATIC:
+      return (
+        <Form.Item
+          label={formatMessage({ id: 'page.route.form.itemLabel.redirectCustom' })}
+          required
+          style={{ marginBottom: 0 }}
+        >
+          <Row gutter={10}>
+            <Col span={5}>
+              <Form.Item
+                name="redirectURI"
+                rules={[
+                  {
+                    required: true,
+                    message: `${formatMessage({
+                      id: 'component.global.pleaseEnter',
+                    })}${formatMessage({
+                      id: 'page.route.form.itemLabel.redirectURI',
+                    })}`,
+                  },
+                ]}
+              >
+                <Input
+                  placeholder={formatMessage({
+                    id: 'page.route.input.placeholder.redirectCustom',
+                  })}
+                  disabled={disabled}
+                />
+              </Form.Item>
+            </Col>
+            <Col span={5}>
               <Form.Item name="ret_code" rules={[{ required: true }]}>
                 <Select disabled={disabled} data-cy="redirect_code">
                   <Select.Option value={301}>
@@ -413,76 +337,150 @@ const CustomRedirectType = () => {
                   </Select.Option>
                 </Select>
               </Form.Item>
+            </Col>
+          </Row>
+        </Form.Item>
+      );
+    case CUSTOM_REDIRECT_TYPE.REGEXP:
+      return (
+        <React.Fragment>
+          <Form.List name="regex_uri" initialValue={['', '']}>
+            {(regex_uris) =>
+              regex_uris.map((regex_uri, index) => {
+                switch (index) {
+                  case 0:
+                    return (
+                      <Form.Item
+                        label={formatMessage({ id: 'page.route.form.itemLabel.regex' })}
+                        name={regex_uri.name}
+                        key={regex_uri.name}
+                        rules={[
+                          {
+                            required: true,
+                            message: `${formatMessage({
+                              id: 'component.global.pleaseEnter',
+                            })} ${formatMessage({ id: 'page.route.form.itemLabel.regex' })}`,
+                          },
+                        ]}
+                      >
+                        <Input
+                          placeholder={`${formatMessage({
+                            id: 'component.global.pleaseEnter',
+                          })} ${formatMessage({ id: 'page.route.form.itemLabel.regex' })}`}
+                          disabled={disabled}
+                        />
+                      </Form.Item>
+                    );
+                  case 1:
+                    return (
+                      <Form.Item
+                        label={formatMessage({ id: 'page.route.form.itemLabel.template' })}
+                        name={regex_uri.name}
+                        key={regex_uri.name}
+                        rules={[
+                          {
+                            required: true,
+                            message: `${formatMessage({
+                              id: 'component.global.pleaseEnter',
+                            })} ${formatMessage({ id: 'page.route.form.itemLabel.template' })}`,
+                          },
+                        ]}
+                      >
+                        <Input
+                          placeholder={`${formatMessage({
+                            id: 'component.global.pleaseEnter',
+                          })} ${formatMessage({ id: 'page.route.form.itemLabel.template' })}`}
+                          disabled={disabled}
+                        />
+                      </Form.Item>
+                    );
+                  default:
+                    return null;
+                }
+              })
+            }
+          </Form.List>
+          <Form.Item
+            label={formatMessage({ id: 'page.route.form.itemLabel.redirectCode' })}
+            required
+            style={{ marginBottom: 0 }}
+          >
+            <Form.Item name="ret_code" rules={[{ required: true }]}>
+              <Select disabled={disabled} data-cy="redirect_code">
+                <Select.Option value={301}>
+                  {formatMessage({ id: 'page.route.select.option.redirect301' })}
+                </Select.Option>
+                <Select.Option value={302}>
+                  {formatMessage({ id: 'page.route.select.option.redirect302' })}
+                </Select.Option>
+              </Select>
             </Form.Item>
-          </React.Fragment>
-        )
-      default:
-        return null;
-  };
+          </Form.Item>
+        </React.Fragment>
+      );
+    default:
+      return null;
+  }
 };
 
-  const CustomRedirect: React.FC = () => {
-    const { formatMessage } = useIntl();
-    const { disabled, onChange = () => {}, form } = useContext(MetaViewContext);
-    const options = [
-      {
-        value: CUSTOM_REDIRECT_TYPE.STATIC,
-        label: formatMessage({ id: 'page.route.radio.static' }),
-      },
-      {
-        value: CUSTOM_REDIRECT_TYPE.REGEXP,
-        label: formatMessage({ id: 'page.route.radio.regex' }),
-      },
-    ];
+const CustomRedirect: React.FC = () => {
+  const { formatMessage } = useIntl();
+  const { disabled, onChange = () => {}, form } = useContext(MetaViewContext);
+  const options = [
+    {
+      value: CUSTOM_REDIRECT_TYPE.STATIC,
+      label: formatMessage({ id: 'page.route.radio.static' }),
+    },
+    {
+      value: CUSTOM_REDIRECT_TYPE.REGEXP,
+      label: formatMessage({ id: 'page.route.radio.regex' }),
+    },
+  ];
 
-    return (
-      <Form.Item
-        noStyle
-        shouldUpdate={(prev, next) => {
-          if (prev.redirectOption !== next.redirectOption) {
-            onChange({ action: 'redirectOptionChange', data: next.redirectOption });
-          }
-          return prev.redirectOption !== next.redirectOption;
-        }}
-      >
-        {() => {
-          if (form.getFieldValue('redirectOption') === 'customRedirect') {
-            return (
-              <React.Fragment>
-                <Form.Item
-                  label={formatMessage({ id: 'page.route.form.itemLabel.URIRewriteType' })}
-                  name="customRedirectType"
-                >
-                  <Radio.Group disabled={disabled}>
-                    {options.map((item) => (
-                      <Radio
-                        value={item.value}
-                        key={item.value}
-                        id={item.value ? 'regex' : 'static'}
-                      >
-                        {item.label}
-                      </Radio>
-                    ))}
-                  </Radio.Group>
-                </Form.Item>
-                <Form.Item
-                  shouldUpdate={(prevValues, curValues) =>
-                    prevValues.customRedirectType !== curValues.customRedirectType
-                  }
-                  noStyle
-                >
-                  {() => {
-                    return CustomRedirectType();
-                  }}
-                </Form.Item>
-              </React.Fragment>
-            );
-          }
-          return null;
-        }}
-      </Form.Item>
-    );
-  };
+  return (
+    <Form.Item
+      noStyle
+      shouldUpdate={(prev, next) => {
+        if (prev.redirectOption !== next.redirectOption) {
+          onChange({ action: 'redirectOptionChange', data: next.redirectOption });
+        }
+        return prev.redirectOption !== next.redirectOption;
+      }}
+    >
+      {() => {
+        if (form.getFieldValue('redirectOption') === 'customRedirect') {
+          return (
+            <React.Fragment>
+              <Form.Item
+                label={formatMessage({ id: 'page.route.form.itemLabel.URIRewriteType' })}
+                name="customRedirectType"
+              >
+                <Radio.Group disabled={disabled}>
+                  {options.map((item) => (
+                    <Radio value={item.value} key={item.value} id={item.value ? 'regex' : 'static'}>
+                      {item.label}
+                    </Radio>
+                  ))}
+                </Radio.Group>
+              </Form.Item>
+              <Form.Item
+                shouldUpdate={(prevValues, curValues) =>
+                  prevValues.customRedirectType !== curValues.customRedirectType
+                }
+                noStyle
+              >
+                {() => {
+                  return CustomRedirectType();
+                }}
+              </Form.Item>
+            </React.Fragment>
+          );
+        }
+        return null;
+      }}
+    </Form.Item>
+  );
+};
 
 const ServiceSelector: FC = () => {
   const { formatMessage } = useIntl();

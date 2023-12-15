@@ -16,14 +16,14 @@
  */
 import { cloneDeep, isEmpty, omit, pick, unset } from 'lodash';
 
-import {
-  CUSTOM_REDIRECT_TYPE,
-  SCHEME_REWRITE,
-  URI_REWRITE_TYPE,
-  HOST_REWRITE_TYPE,
-} from '@/pages/Route/constants';
 import { convertToFormData } from '@/components/Upstream/service';
 import { transformLabelValueToKeyValue } from '@/helpers';
+import {
+  CUSTOM_REDIRECT_TYPE,
+  HOST_REWRITE_TYPE,
+  SCHEME_REWRITE,
+  URI_REWRITE_TYPE,
+} from '@/pages/Route/constants';
 
 export const transformProxyRewrite2Plugin = (
   data: RouteModule.ProxyRewrite,
