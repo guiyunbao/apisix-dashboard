@@ -62,13 +62,14 @@ context('Create Edit and Delete Route with redirect plugin', () => {
   it('should create route with custom redirect plugin', function () {
     cy.visit('/');
     cy.contains('Route').click();
+    cy.get(selector.empty).should('be.visible');
     cy.contains('Create').click();
     cy.wait(timeout * 2);
     cy.contains('Next').click();
     cy.contains('Next').click();
     cy.get(selector.name).type(name);
     cy.get(selector.redirect).click();
-    cy.contains('Custom').click({ force: true });
+    cy.contains('Custom').click();
     // after choose Custom option, Custom Redirect form field should be visible
     cy.get(selector.customRedirectLabel).should('be.visible');
     cy.get(selector.customRedirectUrI).should('be.visible');
@@ -115,6 +116,7 @@ context('Create Edit and Delete Route with redirect plugin', () => {
     cy.contains(data.submitSuccess);
     cy.contains('Goto List').click();
     cy.url().should('contains', 'routes/list');
+    cy.contains(newName).should('be.visible');
   });
 
   it('should delete the route', function () {

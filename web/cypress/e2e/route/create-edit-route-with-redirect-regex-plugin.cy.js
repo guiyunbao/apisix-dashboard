@@ -17,8 +17,9 @@
 /* eslint-disable no-undef */
 
 context('Create Edit and Delete Route with redirect plugin', () => {
-  const name = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDay()}`;
-  const newName = `${new Date().getFullYear()}*${new Date().getMonth() + 1}*${new Date().getDay()}`;
+  const name = `routeName${Date.now()}`;
+  const newName = `newName${Date.now()}`;
+  const timeout = 2000;
 
   const selector = {
     empty: '.ant-empty-normal',
@@ -54,8 +55,11 @@ context('Create Edit and Delete Route with redirect plugin', () => {
   it('should create route with custom redirect plugin', function () {
     cy.visit('/');
     cy.contains('Route').click();
+    cy.get(selector.empty).should('be.visible');
     cy.contains('Create').click();
-    cy.contains('Next').click().click();
+    cy.wait(timeout * 2);
+    cy.contains('Next').click();
+    cy.contains('Next').click();
     cy.get(selector.name).type(name);
     cy.get(selector.redirect).click();
     cy.contains('Custom').click({ force: true });
@@ -105,6 +109,7 @@ context('Create Edit and Delete Route with redirect plugin', () => {
     cy.contains(data.submitSuccess);
     cy.contains('Goto List').click();
     cy.url().should('contains', 'routes/list');
+    cy.contains(newName).should('be.visible');
   });
 
   it('should delete the route', function () {
