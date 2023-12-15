@@ -17,31 +17,29 @@
 /* eslint-disable no-undef */
 
 context('Create Edit and Delete Route with redirect plugin', () => {
-  const name = `routeName${Date.now()}`;
-  const newName = `newName${Date.now()}`;
-  const timeout = 2000;
+  const name = `${new Date().getFullYear()}-${new Date().getMonth() + 1}-${new Date().getDay()}`;
+  const newName = `${new Date().getFullYear()}*${new Date().getMonth() + 1}*${new Date().getDay()}`;
 
   const selector = {
     empty: '.ant-empty-normal',
     name: '#name',
     redirect: '[data-cy=route-redirect]',
     customRedirectSelectOpt: '#redirectOption_list_1',
-    httpsRedirectSelectOpt: '#redirectOption_list_2',
-    customRedirectUrI: '#redirectURI',
+    regex: '#regex',
     customRedirectCode: '[data-cy=redirect_code]',
-    customRedirectLabel: "[title='Custom Redirect']",
+    customRedirectRegexLabel: "[title='Regexp']",
+    regexp: '#regex_uri_0',
+    template: '#regex_uri_1',
     deleteAlert: '.ant-modal-body',
     notificationCloseIcon: '.ant-notification-close-icon',
     notification: '.ant-notification-notice-message',
     webSocketSelector: '[title=WebSocket]',
     enable_websocket_button: '#enable_websocket',
-    hosts_0: '#hosts_0',
-    nodes_0_host: '#submitNodes_0_host',
   };
 
   const data = {
-    customRedirectUrI: '/test',
-    host1: 'test.com',
+    customRedirectRegexUri: '^/iresty/(.)/(.)/(.*)',
+    customRedirectTemplate: '/$1-$2-$3',
     submitSuccess: 'Submit Successfully',
     deleteRouteSuccess: 'Delete Route Successfully',
     step2Title: 'Define API Backend Server',
@@ -49,29 +47,24 @@ context('Create Edit and Delete Route with redirect plugin', () => {
     setUpstreamNotice: 'If you do not bind the service, you must set the Upstream (Step 2)',
   };
 
-  before(() => {
-    cy.clearLocalStorageSnapshot();
-    cy.login();
-    cy.saveLocalStorage();
-  });
-
   beforeEach(() => {
-    cy.restoreLocalStorage();
+    cy.login();
   });
 
   it('should create route with custom redirect plugin', function () {
     cy.visit('/');
     cy.contains('Route').click();
     cy.contains('Create').click();
-    cy.wait(timeout * 2);
-    cy.contains('Next').click();
-    cy.contains('Next').click();
+    cy.contains('Next').click().click();
     cy.get(selector.name).type(name);
     cy.get(selector.redirect).click();
     cy.contains('Custom').click({ force: true });
+    cy.get(selector.regex).click();
+
     // after choose Custom option, Custom Redirect form field should be visible
-    cy.get(selector.customRedirectLabel).should('be.visible');
-    cy.get(selector.customRedirectUrI).should('be.visible');
+    cy.get(selector.customRedirectRegexLabel).should('be.visible');
+    cy.get(selector.regexp).should('be.visible');
+    cy.get(selector.template).should('be.visible');
     cy.get(selector.customRedirectCode).should('be.visible');
     cy.get(selector.webSocketSelector).should('exist');
     cy.get(selector.enable_websocket_button).should('exist');
@@ -79,8 +72,9 @@ context('Create Edit and Delete Route with redirect plugin', () => {
     // step 2 and step 3 should not be visible
     cy.contains(data.step2Title).should('not.exist');
     cy.contains(data.step3Title).should('not.exist');
-    // type customRedirectUrI
-    cy.get(selector.customRedirectUrI).type(data.customRedirectUrI);
+    // type customRedirectRegexUri and customRedirectTemplate
+    cy.get(selector.regexp).type(data.customRedirectRegexUri);
+    cy.get(selector.template).type(data.customRedirectTemplate);
     cy.contains('Next').click();
     cy.contains('Submit').click();
     cy.contains(data.submitSuccess);
@@ -99,18 +93,14 @@ context('Create Edit and Delete Route with redirect plugin', () => {
     cy.contains(name).siblings().contains('Configure').click();
 
     // NOTE: make sure all components rerender done
-    cy.wait(timeout);
     cy.get('#status').should('have.class', 'ant-switch-checked');
     // should not shown set upstream notice
     cy.contains(data.setUpstreamNotice).should('not.exist');
-    cy.get(selector.name).focus().clear().type(newName).blur();
+    cy.get(selector.name).clear().type(newName);
     cy.get(selector.webSocketSelector).should('exist');
     cy.get(selector.enable_websocket_button).should('exist');
 
-    for (let i = 0; i < 3; i += 1) {
-      cy.contains('Next').focus().click({ force: true });
-      cy.wait(timeout);
-    }
+    cy.contains('Next').click();
     cy.contains('Submit').click();
     cy.contains(data.submitSuccess);
     cy.contains('Goto List').click();
@@ -119,45 +109,9 @@ context('Create Edit and Delete Route with redirect plugin', () => {
 
   it('should delete the route', function () {
     cy.visit('/routes/list');
-    cy.get(selector.name).focus().clear().type(newName);
+    cy.get(selector.name).clear().type(newName);
     cy.contains('Search').click();
     cy.contains(newName).siblings().contains('More').click();
-    cy.contains('Delete').click();
-    cy.get(selector.deleteAlert)
-      .should('be.visible')
-      .within(() => {
-        cy.contains('OK').click();
-      });
-    cy.get(selector.notification).should('contain', data.deleteRouteSuccess);
-    cy.get(selector.notificationCloseIcon).click({ multiple: true });
-  });
-
-  it('should enable https redirect without ssl', () => {
-    cy.visit('/');
-    cy.contains('Route').click();
-    cy.wait(timeout * 2);
-    cy.get(selector.empty).should('be.visible');
-    cy.contains('Create').click();
-    cy.wait(timeout * 2);
-    cy.contains('Next').click();
-    cy.contains('Next').click();
-    cy.get(selector.name).type(name);
-    cy.get(selector.redirect).click();
-    cy.contains('Enable HTTPS').click({ force: true });
-
-    cy.get(selector.hosts_0).type(data.host1);
-    cy.contains('Next').click();
-    cy.get(selector.nodes_0_host).type(data.host1);
-    cy.contains('Next').click();
-    cy.contains('Next').click();
-    cy.contains('Submit').click();
-    cy.contains(data.submitSuccess);
-    cy.contains('Goto List').click();
-    cy.url().should('contains', 'routes/list');
-
-    cy.get(selector.name).focus().clear().type(name);
-    cy.contains('Search').click();
-    cy.contains(name).siblings().contains('More').click();
     cy.contains('Delete').click();
     cy.get(selector.deleteAlert)
       .should('be.visible')
