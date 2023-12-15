@@ -108,9 +108,9 @@ context('Create PluginTemplate Binding To Route', () => {
     cy.get(selector.nameSelector).type(data.routeName);
     cy.contains('Search').click();
     cy.contains(data.routeName).siblings().contains('Configure').click();
-
     cy.contains('Forbidden').click();
     cy.contains('Custom').click();
+    cy.wait(1000);
     cy.get(selector.redirectURIInput).clear().type('123');
     cy.get(selector.redirectCodeSelector).click();
     cy.contains('301(Permanent Redirect)').click();

@@ -61,6 +61,7 @@ context('Create Edit and Delete Route with redirect plugin', () => {
     cy.contains('Next').click();
     cy.contains('Next').click();
     cy.get(selector.name).type(name);
+    cy.wait(timeout);
     cy.get(selector.redirect).click();
     cy.contains('Custom').click({ force: true });
     cy.get(selector.regex).click();
